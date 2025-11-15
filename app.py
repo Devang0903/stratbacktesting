@@ -382,10 +382,11 @@ with tab1:
     ### Step-by-Step Process
     
     #### 1️⃣ **Signal Generation** (End of Day t)
-    - Calculate the **21-day return** for each DJIA stock:
+    - Calculate the **past N-day return** for each DJIA stock:
       ```
-      Return_i(t) = (Price_i(t) / Price_i(t-21)) - 1
+      Return_i(t) = (Price_i(t) / Price_i(t-N)) - 1
       ```
+      where N is the lookback period (default: 21 trading days)
     - Compute the **reversal score**:
       ```
       Reversal_Score_i(t) = -1 × Return_i(t)
@@ -395,7 +396,7 @@ with tab1:
     #### 2️⃣ **Stock Selection** (End of Day t)
     - Rank all 30 DJIA stocks by reversal score (descending)
     - Select the **top K worst performers** (default: K = 10)
-    - These are the stocks with the most negative 21-day returns
+    - These are the stocks with the most negative returns over the lookback period
     
     #### 3️⃣ **Portfolio Construction** (End of Day t)
     - Assign **equal weights** to selected stocks: `Weight = 1/K`
@@ -441,7 +442,7 @@ with tab1:
         - **Execution**: Trades executed at closing prices (no slippage)
         - **Trading Costs**: Applied per unit of turnover (configurable)
         - **Data**: Uses adjusted close prices (accounts for splits/dividends)
-        - **Lookback Period**: 21 trading days (~1 month)
+        - **Lookback Period**: Configurable (default: 21 trading days, ~1 month)
         - **No Market Impact**: Large orders don't affect prices
         - **Perfect Liquidity**: Can always buy/sell at closing price
         """)
@@ -456,13 +457,14 @@ with tab1:
     with param_col1:
         st.markdown("""
         ### 📊 Lookback Period
-        **21 Trading Days**
+        **Configurable (Default: 21 Trading Days)**
         
         The number of days used to calculate the return signal. 
-        This is approximately one month of trading.
+        Default is approximately one month of trading.
         
         - Longer lookback = captures longer-term trends
         - Shorter lookback = more sensitive to recent moves
+        - Currently set to 21 days in the implementation
         """)
     
     with param_col2:
@@ -631,7 +633,7 @@ with st.sidebar:
     st.markdown("""
     **Strategy:**
     - Daily mean-reversion on DJIA stocks
-    - 21-day lookback period
+    - Past N-day return lookback (configurable)
     - Selects worst performers
     - Daily rebalancing
     """)
