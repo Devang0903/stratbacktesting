@@ -326,10 +326,254 @@ def run_backtest(start_date, end_date, top_k, trading_cost_bps):
         st.error(f"Error running backtest: {str(e)}")
         return None
 
-# Main UI
+# Main UI - Home Page
 st.markdown('<h1 class="main-header">📈 DJIA Mean-Reversion Trading Strategy</h1>', unsafe_allow_html=True)
 
-# Sidebar for configuration
+# Create tabs for Home and Backtest
+tab1, tab2 = st.tabs(["🏠 Home", "📊 Backtest & Results"])
+
+with tab1:
+    # Home Page Content
+    st.markdown("""
+    ## Welcome to the DJIA Mean-Reversion Trading Strategy Backtester
+    
+    This interactive application allows you to backtest a **cross-sectional mean-reversion strategy** 
+    on the 30 Dow Jones Industrial Average (DJIA) stocks. The strategy is based on the principle that 
+    stocks that have performed poorly in the recent past may be oversold and likely to rebound.
+    """)
+    
+    st.divider()
+    
+    # Strategy Overview
+    st.header("🎯 Strategy Overview")
+    
+    col_strat1, col_strat2 = st.columns(2)
+    
+    with col_strat1:
+        st.markdown("""
+        ### Core Concept
+        
+        **Mean Reversion** is a financial theory suggesting that asset prices tend to return to their 
+        average over time. This strategy exploits short-term price reversals by:
+        
+        - 📉 Identifying stocks that have declined significantly
+        - 📊 Ranking them by recent performance
+        - 🎯 Selecting the worst performers
+        - 💰 Buying them with the expectation of a bounce back
+        """)
+    
+    with col_strat2:
+        st.markdown("""
+        ### Investment Universe
+        
+        - **30 DJIA Stocks**: All components of the Dow Jones Industrial Average
+        - **Long-Only**: No short selling allowed
+        - **Equal-Weighted**: Selected stocks receive equal portfolio weights
+        - **Daily Rebalancing**: Portfolio is rebalanced every trading day
+        - **No Leverage**: Fully invested, no margin trading
+        """)
+    
+    st.divider()
+    
+    # How It Works
+    st.header("⚙️ How the Strategy Works")
+    
+    st.markdown("""
+    ### Step-by-Step Process
+    
+    #### 1️⃣ **Signal Generation** (End of Day t)
+    - Calculate the **21-day return** for each DJIA stock:
+      ```
+      Return_i(t) = (Price_i(t) / Price_i(t-21)) - 1
+      ```
+    - Compute the **reversal score**:
+      ```
+      Reversal_Score_i(t) = -1 × Return_i(t)
+      ```
+    - Higher reversal score = more oversold (better buy candidate)
+    
+    #### 2️⃣ **Stock Selection** (End of Day t)
+    - Rank all 30 DJIA stocks by reversal score (descending)
+    - Select the **top K worst performers** (default: K = 10)
+    - These are the stocks with the most negative 21-day returns
+    
+    #### 3️⃣ **Portfolio Construction** (End of Day t)
+    - Assign **equal weights** to selected stocks: `Weight = 1/K`
+    - All other stocks receive weight = 0
+    - Portfolio is fully invested (sum of weights = 1.0)
+    
+    #### 4️⃣ **Execution** (Day t+1)
+    - **Buy**: Purchase selected stocks at the **close of day t**
+    - **Hold**: Hold positions overnight
+    - **Sell**: Sell all positions at the **close of day t+1**
+    - **Repeat**: Process repeats daily
+    
+    #### 5️⃣ **Performance Tracking**
+    - Calculate daily portfolio returns
+    - Apply trading costs (default: 5 basis points per unit of turnover)
+    - Track equity curve, drawdowns, and risk metrics
+    - Compare against DIA ETF (buy-and-hold benchmark)
+    """)
+    
+    st.divider()
+    
+    # Key Assumptions
+    st.header("📋 Key Assumptions & Constraints")
+    
+    assumption_col1, assumption_col2 = st.columns(2)
+    
+    with assumption_col1:
+        st.markdown("""
+        ### ✅ Strategy Constraints
+        
+        - **Long-Only**: No short positions allowed
+        - **No Leverage**: Cannot borrow money to invest
+        - **No Derivatives**: Only equity positions
+        - **Fully Invested**: 100% of capital deployed
+        - **Equal Weights**: Selected stocks have equal allocation
+        - **Daily Rebalancing**: Portfolio changes every trading day
+        """)
+    
+    with assumption_col2:
+        st.markdown("""
+        ### ⚠️ Important Assumptions
+        
+        - **Execution**: Trades executed at closing prices (no slippage)
+        - **Trading Costs**: Applied per unit of turnover (configurable)
+        - **Data**: Uses adjusted close prices (accounts for splits/dividends)
+        - **Lookback Period**: 21 trading days (~1 month)
+        - **No Market Impact**: Large orders don't affect prices
+        - **Perfect Liquidity**: Can always buy/sell at closing price
+        """)
+    
+    st.divider()
+    
+    # Strategy Parameters
+    st.header("🎛️ Strategy Parameters")
+    
+    param_col1, param_col2, param_col3 = st.columns(3)
+    
+    with param_col1:
+        st.markdown("""
+        ### 📊 Lookback Period
+        **21 Trading Days**
+        
+        The number of days used to calculate the return signal. 
+        This is approximately one month of trading.
+        
+        - Longer lookback = captures longer-term trends
+        - Shorter lookback = more sensitive to recent moves
+        """)
+    
+    with param_col2:
+        st.markdown("""
+        ### 🎯 Top K Selection
+        **Default: 10 stocks**
+        
+        The number of worst-performing stocks to select each day.
+        
+        - Higher K = more diversification, lower concentration risk
+        - Lower K = more concentrated, potentially higher returns/volatility
+        - Range: 1 to 30 (all DJIA stocks)
+        """)
+    
+    with param_col3:
+        st.markdown("""
+        ### 💰 Trading Costs
+        **Default: 5 basis points**
+        
+        Cost per unit of portfolio turnover.
+        
+        - Includes commissions, spreads, and market impact
+        - Applied to both buys and sells
+        - Higher costs = lower net returns
+        - Typical range: 0-20 bps
+        """)
+    
+    st.divider()
+    
+    # Performance Metrics Explained
+    st.header("📈 Performance Metrics Explained")
+    
+    metrics_col1, metrics_col2 = st.columns(2)
+    
+    with metrics_col1:
+        st.markdown("""
+        ### Return Metrics
+        
+        **CAGR (Compound Annual Growth Rate)**
+        - Annualized return over the entire period
+        - Accounts for compounding effects
+        - Higher is better
+        
+        **Hit Rate**
+        - Percentage of days with positive returns
+        - Measures consistency of strategy
+        - Higher is better (typically >50%)
+        """)
+    
+    with metrics_col2:
+        st.markdown("""
+        ### Risk Metrics
+        
+        **Sharpe Ratio**
+        - Risk-adjusted return: (Return - Risk-free) / Volatility
+        - Measures return per unit of risk
+        - Higher is better (typically >1.0 is good)
+        
+        **Max Drawdown**
+        - Largest peak-to-trough decline
+        - Measures worst-case loss
+        - Lower (less negative) is better
+        """)
+    
+    st.divider()
+    
+    # Benchmark Comparison
+    st.header("📊 Benchmark: DIA ETF")
+    
+    st.markdown("""
+    The strategy is compared against the **SPDR Dow Jones Industrial Average ETF (DIA)**, 
+    which tracks the DJIA index.
+    
+    - **DIA Strategy**: Buy and hold the entire DJIA index
+    - **Our Strategy**: Daily mean-reversion on individual DJIA stocks
+    - **Comparison**: Helps evaluate if active trading beats passive investing
+    """)
+    
+    st.divider()
+    
+    # Getting Started
+    st.header("🚀 Getting Started")
+    
+    st.markdown("""
+    ### Ready to Run a Backtest?
+    
+    1. **Navigate to the "📊 Backtest & Results" tab** (above)
+    2. **Configure your parameters** in the sidebar:
+       - Select date range (default: 2015-11-15 to 2025-11-14 uses cached data)
+       - Choose number of stocks (K)
+       - Set trading costs
+    3. **Click "🚀 Run Backtest"**
+    4. **Analyze the results**:
+       - Performance metrics
+       - Equity curves
+       - Drawdown analysis
+       - Monthly returns heatmap
+       - Daily trades log
+    5. **Download results** as CSV files
+    
+    💡 **Pro Tip**: Use the default date range (2015-11-15 to 2025-11-14) to use 
+    cached data and get instant results!
+    """)
+    
+    st.info("""
+    **Note**: This is a backtesting tool for educational and research purposes. 
+    Past performance does not guarantee future results. Always do your own research 
+    and consider consulting with a financial advisor before making investment decisions.
+    """)
+
+# Sidebar for configuration (available in both tabs)
 with st.sidebar:
     st.header("⚙️ Strategy Configuration")
     
@@ -383,19 +627,21 @@ with st.sidebar:
     run_button = st.button("🚀 Run Backtest", type="primary", use_container_width=True)
     
     st.markdown("---")
-    st.markdown("### 📖 About")
+    st.markdown("### 📖 Quick Info")
     st.markdown("""
-    **Strategy Description:**
-    - Daily mean-reversion strategy on DJIA stocks
-    - Selects worst performing stocks (21-day return)
-    - Buys at close, sells next day at close
-    - Equal-weighted positions
+    **Strategy:**
+    - Daily mean-reversion on DJIA stocks
+    - 21-day lookback period
+    - Selects worst performers
+    - Daily rebalancing
     """)
 
-# Main content area
-if run_button or st.session_state.backtest_results is not None:
-    if run_button:
-        with st.spinner("Running backtest... This may take a minute."):
+# Backtest & Results Tab
+with tab2:
+    # Main content area
+    if run_button or st.session_state.backtest_results is not None:
+        if run_button:
+            with st.spinner("Running backtest... This may take a minute."):
             results = run_backtest(
                 start_date.strftime('%Y-%m-%d'),
                 end_date.strftime('%Y-%m-%d'),
@@ -647,34 +893,23 @@ if run_button or st.session_state.backtest_results is not None:
                 mime="text/csv"
             )
 
-else:
-    # Welcome screen
-    st.info("👈 **Configure your strategy in the sidebar and click 'Run Backtest' to get started!**")
-    
-    st.markdown("""
-    ### 🎯 Strategy Overview
-    
-    This is a **daily mean-reversion trading strategy** on the 30 Dow Jones Industrial Average (DJIA) stocks.
-    
-    **How it works:**
-    1. 📊 **Signal Generation**: Calculates 21-day returns for all DJIA stocks
-    2. 📉 **Stock Selection**: Ranks stocks by worst performance (most negative returns)
-    3. 🎯 **Portfolio Construction**: Selects top K worst performers with equal weights
-    4. 💰 **Execution**: 
-       - Buys selected stocks at market close each day
-       - Sells all positions at next day's close
-       - Repeats daily
-    
-    **Key Features:**
-    - ✅ Fully automated backtesting
-    - ✅ Performance metrics and visualizations
-    - ✅ Comparison with DIA ETF benchmark
-    - ✅ Detailed trade log export
-    - ✅ Interactive charts and analysis
-    
-    **Use the sidebar to configure:**
-    - Date range for backtesting
-    - Number of stocks to select (K)
-    - Trading costs
-    """)
+    else:
+        # Welcome screen for Backtest tab
+        st.info("👈 **Configure your strategy in the sidebar and click 'Run Backtest' to get started!**")
+        
+        st.markdown("""
+        ### 📊 Backtest Configuration
+        
+        Use the sidebar to configure your backtest parameters:
+        
+        - **Date Range**: Select the period to backtest (default dates use cached data for faster results)
+        - **Number of Stocks (K)**: How many worst performers to select each day
+        - **Trading Costs**: Transaction costs in basis points
+        
+        Then click **"🚀 Run Backtest"** to see the results!
+        
+        ---
+        
+        **For a detailed explanation of the strategy, visit the "🏠 Home" tab above.**
+        """)
 
