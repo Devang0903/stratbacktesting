@@ -642,21 +642,21 @@ with tab2:
     if run_button or st.session_state.backtest_results is not None:
         if run_button:
             with st.spinner("Running backtest... This may take a minute."):
-            results = run_backtest(
-                start_date.strftime('%Y-%m-%d'),
-                end_date.strftime('%Y-%m-%d'),
-                top_k,
-                trading_cost_bps
-            )
-            
-            if results:
-                st.session_state.backtest_results = results
-                st.session_state.trades_df = results['trades_df']
-                st.session_state.strategy_metrics = results['strategy_metrics']
-                st.session_state.dia_metrics = results['dia_metrics']
-                st.success("✅ Backtest completed successfully!")
-            else:
-                st.error("❌ Backtest failed. Please check the configuration.")
+                results = run_backtest(
+                    start_date.strftime('%Y-%m-%d'),
+                    end_date.strftime('%Y-%m-%d'),
+                    top_k,
+                    trading_cost_bps
+                )
+                
+                if results:
+                    st.session_state.backtest_results = results
+                    st.session_state.trades_df = results['trades_df']
+                    st.session_state.strategy_metrics = results['strategy_metrics']
+                    st.session_state.dia_metrics = results['dia_metrics']
+                    st.success("✅ Backtest completed successfully!")
+                else:
+                    st.error("❌ Backtest failed. Please check the configuration.")
     
     if st.session_state.backtest_results:
         results = st.session_state.backtest_results
