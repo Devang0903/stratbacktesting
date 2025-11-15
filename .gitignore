@@ -1,0 +1,35 @@
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Data files (exclude from git - too large)
+data/*.pkl
+data/*.pickle
+data/*.csv
+!data/.gitkeep
+
+# Plot outputs (generated files)
+plots/*.png
+plots/*.pdf
+plots/*.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+
