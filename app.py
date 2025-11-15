@@ -452,6 +452,14 @@ with tab1:
     # Strategy Parameters
     st.header("🎛️ Strategy Parameters")
     
+    # Default Settings Box
+    st.info("""
+    **📌 Default Settings:**
+    - **Number of Stocks (K)**: 10 stocks
+    - **Backtest Period**: 10 years
+    - **Trading Cost**: 5 basis points (bps)
+    """)
+    
     param_col1, param_col2, param_col3 = st.columns(3)
     
     with param_col1:
@@ -477,6 +485,7 @@ with tab1:
         - Higher K = more diversification, lower concentration risk
         - Lower K = more concentrated, potentially higher returns/volatility
         - Range: 1 to 30 (all DJIA stocks)
+        - **Our default: 10 stocks**
         """)
     
     with param_col3:
@@ -490,6 +499,7 @@ with tab1:
         - Applied to both buys and sells
         - Higher costs = lower net returns
         - Typical range: 0-20 bps
+        - **Our default: 5 bps**
         """)
     
     st.divider()
@@ -553,9 +563,9 @@ with tab1:
     
     1. **Navigate to the "📊 Backtest & Results" tab** (above)
     2. **Configure your parameters** in the sidebar:
-       - Select date range (default: 2015-11-15 to 2025-11-14 uses cached data)
-       - Choose number of stocks (K)
-       - Set trading costs
+       - Select date range (default: 10 years, uses cached data for faster results)
+       - Choose number of stocks (K) - **default: 10 stocks**
+       - Set trading costs - **default: 5 bps**
     3. **Click "🚀 Run Backtest"**
     4. **Analyze the results**:
        - Performance metrics
@@ -565,7 +575,7 @@ with tab1:
        - Daily trades log
     5. **Download results** as CSV files
     
-    💡 **Pro Tip**: Use the default date range (2015-11-15 to 2025-11-14) to use 
+    💡 **Pro Tip**: Use the default settings (10 stocks, 10 years, 5 bps) to use 
     cached data and get instant results!
     """)
     
