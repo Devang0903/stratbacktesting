@@ -442,7 +442,7 @@ with tab1:
         - **Execution**: Trades executed at closing prices (no slippage)
         - **Trading Costs**: Applied per unit of turnover (configurable)
         - **Data**: Uses adjusted close prices (accounts for splits/dividends)
-        - **Lookback Period**: Configurable (default: 21 trading days, ~1 month)
+        - **Lookback Period**: Configurable parameter (typically ~1 month of trading days)
         - **No Market Impact**: Large orders don't affect prices
         - **Perfect Liquidity**: Can always buy/sell at closing price
         """)
@@ -457,14 +457,14 @@ with tab1:
     with param_col1:
         st.markdown("""
         ### 📊 Lookback Period
-        **Configurable (Default: 21 Trading Days)**
+        **Configurable Parameter**
         
         The number of days used to calculate the return signal. 
-        Default is approximately one month of trading.
+        This determines how far back to look when computing returns.
         
         - Longer lookback = captures longer-term trends
         - Shorter lookback = more sensitive to recent moves
-        - Currently set to 21 days in the implementation
+        - Can be adjusted in the strategy implementation
         """)
     
     with param_col2:
