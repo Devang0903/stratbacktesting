@@ -386,7 +386,7 @@ with tab1:
       ```
       Return_i(t) = (Price_i(t) / Price_i(t-N)) - 1
       ```
-      where N is the lookback period (default: 21 trading days)
+      where N is the configurable lookback period
     - Compute the **reversal score**:
       ```
       Reversal_Score_i(t) = -1 × Return_i(t)
